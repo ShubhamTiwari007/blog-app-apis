@@ -1,12 +1,16 @@
 package com.blog.app.services.impl;
 
+import com.blog.app.config.AppConstant;
+import com.blog.app.entities.Role;
 import com.blog.app.entities.User;
 import com.blog.app.exceptions.ResourceNotFoundException;
 import com.blog.app.payloads.UserDto;
+import com.blog.app.repositries.RoleRepo;
 import com.blog.app.repositries.UserRepo;
 import com.blog.app.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,13 +25,19 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepo roleRepo;
+
 
     private User dtoToUser(UserDto userDto) {
-        return this.modelMapper.map(userDto,User.class);
+        return this.modelMapper.map(userDto, User.class);
     }
 
     private UserDto userToDto(User user) {
-        return this.modelMapper.map(user,UserDto.class);
+        return this.modelMapper.map(user, UserDto.class);
     }
 
 
@@ -39,8 +49,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto registerUser(UserDto userDto) {
+        User user = this.modelMapper.map(userDto, User.class);
+
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+
+        Role role = this.roleRepo.findById(AppConstant.NORMAL_USER).get();
+        user.getRoles().add(role);
+
+        User newUser = this.userRepo.save(user);
+
+        return this.modelMapper.map(newUser, UserDto.class);
+    }
+
+    @Override
     public UserDto updateUser(UserDto userDto, Integer id) {
-        User user = this.userRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("User","id",id));
+        User user = this.userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
@@ -55,7 +79,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Integer id) {
-        User user = this.userRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("User","id",id));
+        User user = this.userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         return userToDto(user);
     }
@@ -69,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Integer id) {
-        User user = this.userRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("User","id",id));
+        User user = this.userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         this.userRepo.delete(user);
     }
 }
