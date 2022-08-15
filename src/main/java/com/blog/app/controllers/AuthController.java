@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/auth/")
 public class AuthController {
@@ -60,7 +62,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto){
+    public ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserDto userDto){
         UserDto userDto1 = this.userService.registerUser(userDto);
         return new ResponseEntity<UserDto>(userDto1, HttpStatus.CREATED);
     }
