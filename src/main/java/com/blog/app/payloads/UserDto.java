@@ -1,5 +1,6 @@
 package com.blog.app.payloads;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,4 +33,8 @@ public class UserDto {
 
     private Set<RoleDto> roles = new HashSet<>();
 
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
 }
